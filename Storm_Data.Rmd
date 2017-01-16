@@ -1,0 +1,32 @@
+---
+title: "Health and Economic Effects of Weather Events"
+author: "Mark Jerome"
+date: "January 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Synopsis.
+
+Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+
+Across the United States, which types of events have the greatest economic consequences?
+
+## Data Processing
+
+```{R cache=TRUE}
+stormData <- read.csv(bzfile("repdata%2Fdata%2FStormData.csv.bz2"))
+validEvents <- readLines("Event Types.txt")
+fat <- tapply(stormData$FATALITIES, tolower(stormData$EVTYPE), sum)
+fatsort <- fat[order(fat, decreasing=TRUE)]
+stormData$PROPDMGEXP <- toupper(stormData$PROPDMGEXP)
+validProp <- stormData$PROPDMGEXP %in% c("", "K", "M", "B")
+stormData$CROPDMGEXP <- toupper(stormData$CROPDMGEXP)
+validCrop <- stormData$CROPDMGEXP %in% c("", "K", "M", "B")
+
+```
+
+## Results
+
