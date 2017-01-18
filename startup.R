@@ -1,0 +1,13 @@
+rawData <- read.csv(bzfile("repdata%2Fdata%2FStormData.csv.bz2"))
+datePOSIX <- strptime(rawData$BGN_DATE, "%m/%d/%Y %H:%M:%S")
+year <- as.numeric(format(datePOSIX, "%Y"))
+stormData <- subset(rawData, year>=1996)
+validEvents <- readLines("Event_Types.txt")
+stormData$EVTYPE <- tolower(as.character(stormData$EVTYPE))
+eventCounts <- table(stormData$EVTYPE)
+eventCumCount <- cumsum(eventCountsSorted)
+eventDF <- as.data.frame(eventCountsSorted)
+eventDF$Var1 <- as.character(eventDF$Var1)
+eventDF$valid <- tolower(eventDF$Var1) %in% tolower(validEvents)
+validDF <- as.data.frame(validEvents)
+validDF$found <- tolower(validEvents) %in% unique(tolower(eventDF$Var1))eventCountsSorted <- eventCounts[order(eventCounts, decreasing=TRUE)]
