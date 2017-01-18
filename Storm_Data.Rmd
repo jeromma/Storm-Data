@@ -16,16 +16,32 @@ Across the United States, which types of events have the greatest economic conse
 
 ## Data Processing
 
-```{R cache=TRUE}
-stormData <- read.csv(bzfile("repdata%2Fdata%2FStormData.csv.bz2"))
-validEvents <- readLines("Event Types.txt")
-fat <- tapply(stormData$FATALITIES, tolower(stormData$EVTYPE), sum)
-fatsort <- fat[order(fat, decreasing=TRUE)]
-stormData$PROPDMGEXP <- toupper(stormData$PROPDMGEXP)
-validProp <- stormData$PROPDMGEXP %in% c("", "K", "M", "B")
-stormData$CROPDMGEXP <- toupper(stormData$CROPDMGEXP)
-validCrop <- stormData$CROPDMGEXP %in% c("", "K", "M", "B")
+This analysis uses data from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  A version of the database containing events starting in the year 1950 and ending in November 2011 was downloaded from [Storm Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2).
 
+First, let's read the data into R straight from the bzip2 formatted file.
+
+```{R cache=TRUE}
+rawData <- read.csv(bzfile("repdata%2Fdata%2FStormData.csv.bz2"))
+```
+
+According to a discussion found in [Database Details](https://www.ncdc.noaa.gov/stormevents/details.jsp), "Due to changes in the data collection and processing procedures over time, there are unique periods of record available depending on the event type."  In particular, different event types have been reported over the years.  Before 1996, only a subset of events were recorded.  Beginning in 1996, all event types were recorded.  This analysis will use only data from 1996 on to ensure all event types are properly represented.
+
+```{R cache=TRUE}
+datePOSIX <- strptime(rawData$BGN_DATE, "%m/%d/%Y %H:%M:%S")
+year <- as.numeric(format(datePOSIX, "%Y"))
+stormData <- subset(rawData, year>=1996)
+```
+
+This keeps `r prettyNum(dim(stormData)[1], big.mark=",")` of the original `r prettyNum(dim(rawData)[1], big.mark=",")` events, while discarding `r prettyNum(dim(rawData)[1]-dim(stormData)[1], big.mark=",")`.
+
+The discussion in [Database Details](https://www.ncdc.noaa.gov/stormevents/details.jsp) indicates "48 event types are recorded as defined in NWS Directive 10-1605."  How many event types are found in our data?
+
+```{R}
+length(unique(stormData$EVTYPE))
+```
+That's quite a discrepancy.
+```{R}
+head(unique(as.character(stormData$EVTYPE)))
 ```
 
 ## Results
