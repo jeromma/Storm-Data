@@ -34,15 +34,36 @@ stormData <- subset(rawData, year>=1996)
 
 This keeps `r prettyNum(dim(stormData)[1], big.mark=",")` of the original `r prettyNum(dim(rawData)[1], big.mark=",")` events, while discarding `r prettyNum(dim(rawData)[1]-dim(stormData)[1], big.mark=",")`.
 
+### Event types
+
+We will want event types to be character rather than factor.
+```{R}
+stormData$EVTYPE <- as.character(stormData$EVTYPE)
+```
+
 The discussion in [Database Details](https://www.ncdc.noaa.gov/stormevents/details.jsp) indicates "48 event types are recorded as defined in NWS Directive 10-1605."  How many event types are found in our data?
 
 ```{R}
 length(unique(stormData$EVTYPE))
 ```
 That's quite a discrepancy.
+Let's make sure capitalization is consistent across recorded event types.
 ```{R}
-head(unique(as.character(stormData$EVTYPE)))
+stormData$EVTYPE <- tolower(stormData$EVTYPE)
+length(unique(stormData$EVTYPE))
 ```
+That's a little better.
+
+What if we ignore event types that contribute less than 1% of the total number of events?
+```{R}
+eventCounts <- table(stormData$EVTYPE)
+eventCountsSorted <- eventCounts[order(eventCounts, decreasing=TRUE)]
+eventCumCount <- cumsum(eventCountsSorted)
+p99 <- .99 * length(stormData$EVTYPE)
+which.max(eventCumCount > p99)
+```
+
+
 
 ## Results
 
